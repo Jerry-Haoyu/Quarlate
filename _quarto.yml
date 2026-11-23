@@ -1,0 +1,26 @@
+project:
+  type: website
+  output-dir: _site
+
+callout-icon: false
+
+website:
+  title: "Dynamical System and Neural Networks"
+  sidebar:
+    contents:
+      - index.qmd
+      - section: "Spiking Neural Network"
+        contents:
+          - theta_neuron.qmd
+          - predicting_chaos.qmd
+  page-navigation: true      # previous/next links at the bottom of each page
+
+format:
+  live-html:
+    theme: cosmo
+    toc: true
+
+pyodide:
+  packages:
+    - numpy
+    - matplotlib

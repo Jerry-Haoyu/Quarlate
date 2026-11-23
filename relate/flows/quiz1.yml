@@ -1,0 +1,164 @@
+# RELATE flow for Homework 1. Copied into the course repo by make_course_repo.sh.
+# Graded on the server (Docker); the Quarto page only has a Pyodide stand-in
+# for the first question.
+title: "Quiz 1"
+description: QIF neuron and event-based simulation
+rules:
+    start:
+    -
+        if_has_role: [student, instructor, ta]
+        may_start_new_session: True
+        may_list_existing_sessions: True
+    access:
+    -
+        permissions: [view, submit_answer, end_session, see_correctness]
+    grade_identifier: quiz1
+    grade_aggregation_strategy: max_grade
+    grading:
+    -
+        credit_percent: 100
+
+groups:
+-
+    id: qz
+    pages:
+    -
+        type: Page
+        id: intro
+        content: |
+            # Quiz 1: QIF neuron and event-based simulation
+
+            The definition of QIF neuron and purely-inhibtory network 
+
+            There are two questions. You may resubmit as often as you like;
+            your best score counts.
+    
+    -
+        type: ChoiceQuestion
+        id: normal
+        title: "1. Concept Check"
+        value: 1
+        access_rules:
+            add_permissions: [change_answer]
+        prompt: |
+            ## Question 1: QIF neuron
+            Suppose in a QIF inhibitory network, $i\gets j$ amd $j$ is perturbed so that it kicks 
+            $i$ slightly later, what happens?
+            
+        choices:
+        - "~CORRECT~ Depends on the current phase"
+        - "It always fires earlier compared to the unperturbed situation"
+        - "It always fires later compared to the unperturbed situation"
+        - "It fires at the same time as to the unperturbed case since the inhibtory kick arrives anyways"
+
+    -
+        type: PythonCodeQuestion
+        id: kernel
+        title: "2. Toy event-based simulation"
+        value: 1
+        timeout: 5
+        access_rules:
+            add_permissions: [change_answer]
+        prompt: |
+            ## Question 2: event-based simulation of 3 QIF neurons
+
+            Topology: $1 \leftrightarrow 2 \leftarrow 3$ (1 and 2 inhibit each other, 3 inhibits 2).
+            Complete the simulation so that `spike_times` and `spike_neurons`
+            hold all spikes up to `T`. Clicking **Run** plots the spike raster.
+        names_from_user: [spike_times, spike_neurons]
+        initial_code: |
+            import numpy as np
+            import matplotlib.pyplot as plt
+
+            PI = np.pi
+
+            def qif_ptc(phi, c):
+                return 2.0 * np.arctan(np.tan(phi / 2.0) + c)
+
+            def simulate_qif_network(T=5.0, tau_m=1.0, Iext=1.0, c=-0.3):
+                omega = 2.0 * np.sqrt(Iext)
+                targets = [[1], [0], [1]]          # 1<->2<-3 (0-indexed)
+                phi = np.array([-2.0, 0.5, -0.5])
+                t, spike_times, spike_neurons = 0.0, [], []
+                while True:
+                    # find the neuron that will fire next
+                    j = # YOUR CODE
+                    
+                    # compute the time of the next spike
+                    t_next = t + # YOUR CODE
+                    
+                    if t_next > T:
+                        break
+
+                    phi += PI - phi[j]
+                    
+                    t = t_next
+
+                    # update postsynaptic neurons
+                    phi[targets[j]] = qif_ptc(phi[targets[j]], c)
+                    
+                    # update the fired neuron
+                    phi[j] = -PI
+
+                    # book keeping
+                    spike_times.append(t)
+                    spike_neurons.append(j)
+                return np.array(spike_times), np.array(spike_neurons)
+
+            def plot_raster(spike_times, spike_neurons, T=5.0):
+                plt.figure(figsize=(6, 2.5))
+                plt.eventplot([spike_times[spike_neurons == i] for i in range(3)])
+                plt.yticks(range(3), ["1", "2", "3"])
+                plt.xlim(0, T)
+                plt.xlabel("time")
+                plt.ylabel("neuron")
+                plt.show()
+
+            spike_times, spike_neurons = simulate_qif_network()
+            plot_raster(spike_times, spike_neurons)
+        test_code: |
+            import numpy as np
+            if list(spike_neurons) == [1, 2, 0, 1, 2] and np.allclose(spike_times, [1.3208, 1.8208, 2.8593, 4.8052, 4.9624], atol=1e-3):
+                feedback.set_points(1)
+                feedback.add_feedback("Correct spike sequence.")
+            else:
+                feedback.set_points(0)
+                feedback.add_feedback("Spike sequence is wrong. Expected neurons [2, 3, 1, 2, 3] (0-indexed [1, 2, 0, 1, 2]).")
+        correct_code: |
+            import numpy as np
+            import matplotlib.pyplot as plt
+
+            PI = np.pi
+
+            def qif_ptc(phi, c):
+                return 2.0 * np.arctan(np.tan(phi / 2.0) + c)
+
+            def simulate_qif_network(T=5.0, tau_m=1.0, Iext=1.0, c=-0.3):
+                omega = 2.0 * np.sqrt(Iext)
+                targets = [[1], [0], [1]]          # 1<->2<-3 (0-indexed)
+                phi = np.array([-2.0, 0.5, -0.5])
+                t, spike_times, spike_neurons = 0.0, [], []
+                while True:
+                    j = int(np.argmax(phi))
+                    t_next = t + tau_m * (PI - phi[j]) / omega
+                    if t_next > T:
+                        break
+                    phi += PI - phi[j]
+                    t = t_next
+                    phi[targets[j]] = qif_ptc(phi[targets[j]], c)
+                    phi[j] = -PI
+                    spike_times.append(t)
+                    spike_neurons.append(j)
+                return np.array(spike_times), np.array(spike_neurons)
+
+            def plot_raster(spike_times, spike_neurons, T=5.0):
+                plt.figure(figsize=(6, 2.5))
+                plt.eventplot([spike_times[spike_neurons == i] for i in range(3)])
+                plt.yticks(range(3), ["1", "2", "3"])
+                plt.xlim(0, T)
+                plt.xlabel("time")
+                plt.ylabel("neuron")
+                plt.show()
+
+            spike_times, spike_neurons = simulate_qif_network()
+            plot_raster(spike_times, spike_neurons)

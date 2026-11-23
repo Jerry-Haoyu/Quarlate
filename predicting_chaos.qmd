@@ -1,0 +1,12 @@
+---
+title: "Predicting Largest Lyapunov Exponent from Spike Statistics"
+format: live-html
+engine: markdown
+pyodide:
+  packages:
+    - numpy
+    - matplotlib
+---
+
+## 
+Start with a candidate ISI distribution $F(h)=Pr(H\leq h)$

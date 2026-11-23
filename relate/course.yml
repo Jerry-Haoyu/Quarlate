@@ -1,0 +1,11 @@
+chunks:
+-
+    title: "ECE 598 RE Dynamical System and Neural Network"
+    id: welcome
+    rules:
+    -
+        weight: 0
+    content: |
+        # ECE 598 RE Dynamical System and Neural Network
+        [Quiz 1](flow:quiz1)
+

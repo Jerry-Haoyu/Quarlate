@@ -1,0 +1,11 @@
+---
+title: "Dynamical System and Neural Networks"
+format: live-html
+pyodide:
+  packages:
+    - numpy
+---
+
+## Dynamical System and Neural Network 
+*Professor Rainer Engelken*
+*TA: Sophia Wilhelm *
