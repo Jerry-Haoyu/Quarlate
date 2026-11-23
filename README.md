@@ -1,5 +1,6 @@
 ---
-@author Haoyu Tang
+title: QUARLATE 
+author: Haoyu Tang
 ---
 # QUARLATE: a simple workflow for computational course websites 
 
